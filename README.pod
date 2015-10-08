@@ -75,9 +75,9 @@ B<Returns> C<Str $tmp-path>
     # create a temporary folder and clean it up after program exit
     my $tmp-path = mkdirs("/tmp/.worker{$id}/{time}")
 
-Creates a new folder, B<$path>, and will attempt to cleanup its contents at C<END { }>.
+Creates a new folder, C<$path>, and will attempt to cleanup its contents at C<END { }>.
 
-If B<$path> is not supplied, a path name will be generated automatically with L<tmpdir>
+If C<$path> is not supplied, a path name will be generated automatically with L<tmpdir>
 
     > say mktemp();
     /tmp/p6mktemp/1444251805_1
