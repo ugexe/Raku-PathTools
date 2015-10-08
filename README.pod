@@ -12,7 +12,7 @@ General purpose file system utility routines
 
 =head4 B<routine> L<ls>
 
-B<Args> C<$path, :$test, Bool :$f = True, Bool :$d = True, Bool :$r>
+B<Args> C<$path, Bool :$f = True, Bool :$d = True, Bool :$r>
 
 B<Returns> C<Str @paths>
 
@@ -28,9 +28,10 @@ B<Returns> C<Str @paths>
     my @dirs  = ls($path, :d);
 
 Like the built-in C<dir> but with optional recursion. Any undocumented 
-key -> value arguments passed in will be passed along to the internal 
-C<mkdir> and C<dir> calls used. For instance, one may wish to pass the 
-C<:$test> which internally defaults to C<none('.','..')>
+additional named arguments passed in will be passed along to the internal 
+C<mkdir> and C<dir> calls used. For instance, one may wish to pass C<:$test> 
+which internally defaults to C<none('.','..')> and is documented further 
+here: L<dir|http://doc.perl6.org/routine/dir>
 
     > .say for ls('t');
     /home/perl6/Perl6-PathTools/t/01-basic.t
