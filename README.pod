@@ -16,6 +16,8 @@ B<Args> C<$path, :$test, Bool :$f = True, Bool :$d = True, Bool :$r>
 
 B<Returns> C<Str @paths>
 
+    use PathTools;
+
     # all paths using a directory recursion
     my @all   = ls($path, :r, :d, :f);
 
