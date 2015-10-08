@@ -1,0 +1,111 @@
+=pod
+
+=encoding utf8
+
+=head2 PathTools
+
+General purpose file system utility routines
+
+=for HTML <a href="https://travis-ci.org/ugexe/Perl6-PathTools"><img src="https://travis-ci.org/ugexe/Perl6-PathTools.svg?branch=master"></a>
+
+=head3 Exports
+
+=head4 B<routine> L<ls>
+
+B<Args> C<$path, :$test, Bool :$f = True, Bool :$d = True, Bool :$r>
+
+B<Returns> C<Str @paths>
+
+    # all paths using a directory recursion
+    my @all   = ls($path, :r, :d, :f);
+
+    # all *file* paths using a directory recursion
+    my @files = ls($path, :r, :f);
+
+    # only directories in the current level (no directory recursion)
+    my @dirs  = ls($path, :d);
+
+Like the built-in C<dir> but with optional recursion. Any undocumented 
+key -> value arguments passed in will be passed along to the internal 
+C<mkdir> and C<dir> calls used. For instance, one may wish to pass the 
+C<:$test> which internally defaults to C<none('.','..')>
+
+    > .say for ls('t');
+    /home/perl6/Perl6-PathTools/t/01-basic.t
+    /home/perl6/Perl6-PathTools/t/00-sanity.t
+
+=head4 B<routine> L<rm> 
+
+B<Args> C<*@paths, :Bool $f = True, Bool :$d = True, Bool :$r>
+
+B<Returns> C<Str @deleted-paths>
+
+    # rm -rf tmp
+    my @deleted-files = rm("tmp/{time}"), :r, :f, :d);
+
+Passes its arguments to L<ls> and subsequently unlinks the files and/or deletes folders, 
+possibly recursively.
+
+    > .say for rm('t');
+    /home/perl6/Perl6-PathTools/t/01-basic.t
+    /home/perl6/Perl6-PathTools/t/00-sanity.t
+
+=head4 B<routine> L<mkdirs> 
+
+B<Args> C<$paths>
+
+B<Returns> C<Str $created-path>
+
+    # generate a multi level temporary path name
+    my $created-path = mkdirs(".work/{$new-month}/{$new-day}")
+
+VM/OS independent folder creation. Identical to the built-in C<mkdir> except the path 
+parts are created folder by folder. This usually isn't needed, but in some edge cases 
+the built-in C<mkdir> fails when creating a multi level folder.
+
+    > say mkdirs('newDir/newSubdir');
+    /home/perl6/newDir/newSubdir
+
+=head4 B<routine> L<mktemp> 
+
+B<Args> C<$path?>
+
+B<Returns> C<Str $tmp-path>
+
+    # create a temporary folder and clean it up after program exit
+    my $tmp-path = mkdirs("/tmp/.worker{$id}/{time}")
+
+Creates a new folder, B<$path>, and will attempt to cleanup its contents at C<END { }>.
+
+If B<$path> is not supplied, a path name will be generated automatically with L<tmpdir>
+
+    > say mktemp();
+    /tmp/p6mktemp/1444251805_1
+
+=head4 B<routine> L<tmpdir> 
+
+B<Args> C<$base-directory? = $*TMPDIR>
+
+B<Returns> C<Str $tmp-path>
+
+    my $tmp-path = tmpdir(".work")
+
+Generate a (hopefully) unique timestamp based path name that is prefixed by C<$base-directory>. 
+This does not actually create the directory; Use L<mkdirs> or C<mkdir> on the result.
+
+    > say tmpdir();
+    /tmp/p6mktemp/1444251805_1
+
+    > say tmpdir(".work");
+    /home/perl6/Perl6-PathTools/.work/1444255482_1
+
+    > say tmpdir("/con/con")'
+    /con/con/p6mktemp/1444268295_1
+
+    > say tmpdir.IO.e;
+    False
+
+    > say mkdirs(tmpdir).IO.e
+    True
+
+=cut
