@@ -1,19 +1,17 @@
 unit module PathTools;
 
 sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r, *%_) is export {
-    return unless $path.IO.e;
-    return $path if ($path.IO.f && ?$f) && (!%_<test> || $path ~~ %_<test>);
-    return (try $path.IO.dir(|%_), try ($path.IO.dir(|%_)>>.&ls(|%_) if ?$r)).flat\
-        .grep({ ($_.IO.f && ?$f) || ($_.IO.d && ?$d) })\
-        .grep(*.IO.e).map(*.IO.absolute).unique; 
-    # unique is required to filter out file paths that get duplicated on recursion
-    # and could theoretically be filtered out in a more "correct" but less concise way
+    return () if !$path.IO.e || (%_<test> && $path !~~ %_<test>);
+    return (?$f ?? $path !! ()) if $path.IO.f;
+    my $cwd-paths = $path.IO.dir(|%_).cache;
+    my $rec-paths = $cwd-paths>>.&ls(:$f, :$d, |%_);
+    (?$r ?? ($cwd-paths.Slip, $rec-paths.Slip) !! $cwd-paths.Slip)>>.Str;
 }
 
 sub rm(*@paths, Bool :$f = True, Bool :$d = True, Bool :$r, *%_) is export {
-    my @ls = flat (@paths>>.&ls(:$f, :$d, :$r, |%_)>>.Slip)>>.Slip;
-    my @delete-us  = sort { -.chars }, @ls>>.Str;
-    my @deleted    = ~$_ for @delete-us.grep(*.IO.e).grep: {try { $_.IO.d ?? $_.IO.rmdir !! $_.IO.unlink}}
+    my @ls        = flat (@paths>>.&ls(:$f, :$d, :$r, |%_)>>.Slip)>>.Slip;
+    my @delete-us = (@paths.Slip, @ls.Slip).sort({-.chars});
+    my @deleted   = ~$_ for @delete-us.grep(*.IO.e).grep: {try { $_.IO.d ?? $_.IO.rmdir !! $_.IO.unlink}}
 }
 
 sub mkdirs($path, *%_) is export {
