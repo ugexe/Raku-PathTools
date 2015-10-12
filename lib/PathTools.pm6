@@ -1,11 +1,13 @@
 unit module PathTools;
 
-sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r, *%_) is export {
-    return () if !$path.IO.e || (%_<test> && $path !~~ %_<test>);
+sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r = False, *%_) is export {
+    return () if !$path.IO.e || (%_<test> && $path ~~ %_<test>);
     return (?$f ?? $path !! ()) if $path.IO.f;
     my $cwd-paths = $path.IO.dir(|%_).cache;
-    my $rec-paths = $cwd-paths>>.&ls(:$f, :$d, |%_);
-    (?$r ?? ($cwd-paths.Slip, $rec-paths.Slip) !! $cwd-paths.Slip)>>.Str;
+    my $files     = $cwd-paths.grep(*.IO.f);
+    my $dirs      = $cwd-paths.grep(*.IO.d);
+    my $rec-paths = $cwd-paths.grep(*.IO.d)>>.&ls(:$f, :$d, :!r, |%_);
+    (($files.Slip if ?$f), ($dirs.Slip if ?$d), ($rec-paths.Slip if ?$r)).flat>>.Str;
 }
 
 sub rm(*@paths, Bool :$f = True, Bool :$d = True, Bool :$r, *%_) is export {
@@ -21,14 +23,15 @@ sub mkdirs($path, *%_) is export {
         take $path-copy;
         last unless $path-copy := $path-copy.IO.dirname;
     } }
-    return @mkdirs ?? @mkdirs.reverse.map({ ~mkdir($_, |%_) }).[*-1] !! ();
+    @mkdirs ?? @mkdirs.reverse.map({ ~mkdir($_, |%_) }).[*-1] !! ();
 }
 
-sub mktemp($path = &tmpdir(), *%_) is export {
-    die "Cannot call mktemp on a directory that already exists" if $path.IO.e && $path.IO.d;
-    state @delete-us;
-    with mkdirs($path, |%_) -> $p { @delete-us.append(~$p); return ~$p }
-    END { rm(|@delete-us, :r, :f, :d) }
+sub mktemp($path = &tmpdir(), Bool :$f = False, *%_) is export {
+    die "Cannot call mktemp with a path that already exists" if $path.IO.e;
+    state @dirs; state @files;
+    END { rm(|@files, :!r, :f, :!d); rm(|@dirs, :r, :f, :d) }
+    ?$f ?? (do { $path.IO.open(:w).close; @files.append($path); return ~$path.IO.absolute  }  )
+        !! (do { with mkdirs($path, |%_) -> $p { @dirs.append(~$p); return ~$p.IO.absolute } })
 }
 
 sub tmpdir(Str(Cool) $base where *.chars = $*TMPDIR) is export {
@@ -38,7 +41,7 @@ sub tmpdir(Str(Cool) $base where *.chars = $*TMPDIR) is export {
     $lock.protect({
         for ^100 { # retry a max number of times
             my $gen-path = $base.IO.child("p6mktemp").child("{time}_{++$id}").IO;
-            if ((!$gen-path.e || $gen-path.e && !$gen-path.d) && $gen-path !~~ @cache) {
+            if !$gen-path.e && $gen-path !~~ @cache {
                 @cache.append(~$gen-path);
                 return ~$gen-path;
             }

@@ -71,19 +71,31 @@ the built-in C<mkdir> fails when creating a multi level folder.
 
 =head4 B<routine> L<mktemp> 
 
-B<Args> C<$path?>
+B<Args> C<$path?, Bool :$f = False>
 
 B<Returns> C<Str $tmp-path>
 
     # create a temporary folder and clean it up after program exit
-    my $tmp-path = mkdirs("/tmp/.worker{$id}/{time}")
+    my $cleanup-path = mkdirs("/tmp/.worker{$id}/{time}")
 
-Creates a new folder, C<$path>, and will attempt to cleanup its contents at C<END { }>.
+If argument C<:$f> is C<True> it will create a new file to be deleted at C<END { }>.
+Otherwise, by default, creates a new folder, C<$path>, and will attempt to recursively
+cleanup its contents at C<END { }>.
 
 If C<$path> is not supplied, a path name will be generated automatically with L<tmpdir>
 
+    # a random directory
     > say mktemp();
     /tmp/p6mktemp/1444251805_1
+
+    # a random file
+    > say mktemp(:f);
+    /tmp/p6mktemp/1444251805_1
+
+    # a file (or directory) name of your choosing
+    > say mktemp(".cache", :f);
+    /home/perl6/Perl6-PathTools/.cache
+
 
 =head4 B<routine> L<tmpdir> 
 
