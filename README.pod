@@ -92,11 +92,11 @@ If C<$path> is not supplied, a path name will be generated automatically with L<
 
     # a random directory
     > say mktemp();
-    /tmp/p6mktemp/1444251805_1
+    /tmp/p6tmppath/1444251805_1
 
     # a random file
     > say mktemp(:f);
-    /tmp/p6mktemp/1444251805_1
+    /tmp/p6tmppath/1444251805_1
 
     # a file (or directory) name of your choosing
     > say mktemp(".cache", :f);
