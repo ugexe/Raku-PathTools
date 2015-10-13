@@ -10,6 +10,18 @@ General purpose file system utility routines
 
 =head3 Exports
 
+=head4 FLAGS
+
+Definitions of the argument flags that can be passed to C<PathTools> routines:
+
+    :f - list files
+    :d - list directories
+    :r - recursively visit directories
+
+    :!f - exclude files
+    :!d - exclude directories
+    :!r - only in the immediate path
+
 =head4 B<routine> L<ls>
 
 B<Args> C<$path, Bool :$f = True, Bool :$d = True, Bool :$r>
@@ -18,20 +30,14 @@ B<Returns> C<Str @paths>
 
     use PathTools;
 
-    # all paths using a directory recursion
+    # all paths using directory recursion
     my @all   = ls($path, :r, :d, :f);
 
-    # all *file* paths using a directory recursion
-    my @files = ls($path, :r, :f);
+    # only *file* paths, found using directory recursion
+    my @files = ls($path, :r, :!d, :f);
 
     # only directories in the current level (no directory recursion)
     my @dirs  = ls($path, :d);
-
-    # file search; recursively find all files with extension `.pm6`
-    my @p6-modules = @files.grep(*.IO.extension ~~ 'pm6')
-
-    # directory search; find all local git repos
-    my @git-repos  = @dirs.grep(*.IO.basename eq ".git");
 
 Like the built-in C<dir> but with optional recursion. Any undocumented 
 additional named arguments passed in will be passed along to the internal 
@@ -42,6 +48,11 @@ here: L<dir|http://doc.perl6.org/routine/dir>
     > .say for ls('t');
     /home/perl6/Perl6-PathTools/t/01-basic.t
     /home/perl6/Perl6-PathTools/t/00-sanity.t
+
+To search for files, just grep the results of C<ls>:
+
+    > my @files     = ls($path, :r, :!d, :f);
+    > my @p6modules = @files.grep(*.IO.extension ~~ 'pm6')
 
 =head4 B<routine> L<rm> 
 
@@ -79,7 +90,7 @@ the built-in C<mkdir> fails when creating a multi level folder.
 
 B<Args> C<$path?, Bool :$f = False>
 
-B<Returns> C<Str $tmp-path>
+B<Returns> C<Str $tmppath>
 
     # create a temporary folder and clean it up after program exit
     my $cleanup-path = mkdirs("/tmp/.worker{$id}/{time}")
