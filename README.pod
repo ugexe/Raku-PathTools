@@ -107,22 +107,22 @@ If C<$path> is not supplied, a path name will be generated automatically with L<
 
 B<Args> C<$base? = $*TMPDIR>
 
-B<Returns> C<Str $tmp-path>
+B<Returns> C<Str $pathname>
 
-    my $tmp-path = tmppath(".work")
+    my $pathname = tmppath(".work")
 
 Generate a (hopefully) unique timestamp based path name that is prefixed by C<$base>.
 This does not actually create the path; Use C<mkdirs> or L<mkdir|http://doc.perl6.org/routine/mkdir>
 on the result.
 
     > say tmppath();
-    /tmp/p6mktemp/1444251805_1
+    /tmp/p6tmppath/1444251805_1
 
     > say tmppath(".work");
-    .work/p6mktemp/1444255482_1
+    .work/p6tmppath/1444255482_1
 
     > say tmppath("/con/con")'
-    /con/con/p6mktemp/1444268295_1
+    /con/con/p6tmppath/1444268295_1
 
     > say tmppath.IO.e;
     False

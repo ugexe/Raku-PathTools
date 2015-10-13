@@ -40,7 +40,7 @@ sub tmppath(Str(Cool) $base where *.chars = $*TMPDIR) is export {
     state @cache;
     $lock.protect({
         for ^100 { # retry a max number of times
-            my $gen-path = $base.IO.child("p6mktemp").child("{time}_{++$id}").IO;
+            my $gen-path = $base.IO.child("p6tmppath").child("{time}_{++$id}").IO;
             if !$gen-path.e && $gen-path !~~ @cache {
                 @cache.append(~$gen-path);
                 return ~$gen-path;
