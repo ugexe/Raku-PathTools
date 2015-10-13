@@ -119,7 +119,7 @@ on the result.
     /tmp/p6mktemp/1444251805_1
 
     > say tmppath(".work");
-    /home/perl6/Perl6-PathTools/.work/1444255482_1
+    .work/p6mktemp/1444255482_1
 
     > say tmppath("/con/con")'
     /con/con/p6mktemp/1444268295_1
