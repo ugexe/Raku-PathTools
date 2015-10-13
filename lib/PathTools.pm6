@@ -1,7 +1,7 @@
 unit module PathTools;
 
 sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r = False, *%_) is export {
-    return () if !$path.IO.e || (%_<test> && $path ~~ %_<test>);
+    return () if !$path.IO.e || (%_<test>:exists && $path !~~ %_<test>);
     return (?$f ?? $path !! ()) if $path.IO.f;
     my $cwd-paths = $path.IO.dir(|%_).cache;
     my $files     = $cwd-paths.grep(*.IO.f);
@@ -26,7 +26,7 @@ sub mkdirs($path, *%_) is export {
     @mkdirs ?? @mkdirs.reverse.map({ ~mkdir($_, |%_) }).[*-1] !! ();
 }
 
-sub mktemp($path = &tmpdir(), Bool :$f = False, *%_) is export {
+sub mktemp($path = &tmppath(), Bool :$f = False, *%_) is export {
     die "Cannot call mktemp with a path that already exists" if $path.IO.e;
     state @dirs; state @files;
     END { rm(|@files, :!r, :f, :!d); rm(|@dirs, :r, :f, :d) }
@@ -34,10 +34,10 @@ sub mktemp($path = &tmpdir(), Bool :$f = False, *%_) is export {
         !! (do { with mkdirs($path, |%_) -> $p { @dirs.append(~$p); return ~$p.IO.absolute } })
 }
 
-sub tmpdir(Str(Cool) $base where *.chars = $*TMPDIR) is export {
+sub tmppath(Str(Cool) $base where *.chars = $*TMPDIR) is export {
     state $lock = Lock.new;
     state $id   = 0;
-    state @cache; # So we don't return the same path in 2 different calls when user has not created the tmpdir yet
+    state @cache;
     $lock.protect({
         for ^100 { # retry a max number of times
             my $gen-path = $base.IO.child("p6mktemp").child("{time}_{++$id}").IO;

@@ -27,6 +27,12 @@ B<Returns> C<Str @paths>
     # only directories in the current level (no directory recursion)
     my @dirs  = ls($path, :d);
 
+    # file search; recursively find all files with extension `.pm6`
+    my @p6-modules = @files.grep(*.IO.extension ~~ 'pm6')
+
+    # directory search; find all local git repos
+    my @git-repos  = @dirs.grep(*.IO.basename eq ".git");
+
 Like the built-in C<dir> but with optional recursion. Any undocumented 
 additional named arguments passed in will be passed along to the internal 
 C<mkdir> and C<dir> calls used. For instance, one may wish to pass C<:$test> 
@@ -82,7 +88,7 @@ If argument C<:$f> is C<True> it will create a new file to be deleted at C<END {
 Otherwise, by default, creates a new folder, C<$path>, and will attempt to recursively
 cleanup its contents at C<END { }>.
 
-If C<$path> is not supplied, a path name will be generated automatically with L<tmpdir>
+If C<$path> is not supplied, a path name will be generated automatically with L<tmppath>
 
     # a random directory
     > say mktemp();
@@ -97,30 +103,31 @@ If C<$path> is not supplied, a path name will be generated automatically with L<
     /home/perl6/Perl6-PathTools/.cache
 
 
-=head4 B<routine> L<tmpdir> 
+=head4 B<routine> L<tmppath>
 
-B<Args> C<$base-directory? = $*TMPDIR>
+B<Args> C<$base? = $*TMPDIR>
 
 B<Returns> C<Str $tmp-path>
 
-    my $tmp-path = tmpdir(".work")
+    my $tmp-path = tmppath(".work")
 
-Generate a (hopefully) unique timestamp based path name that is prefixed by C<$base-directory>. 
-This does not actually create the directory; Use L<mkdirs> or C<mkdir> on the result.
+Generate a (hopefully) unique timestamp based path name that is prefixed by C<$base>.
+This does not actually create the path; Use C<mkdirs> or L<mkdir|http://doc.perl6.org/routine/mkdir>
+on the result.
 
-    > say tmpdir();
+    > say tmppath();
     /tmp/p6mktemp/1444251805_1
 
-    > say tmpdir(".work");
+    > say tmppath(".work");
     /home/perl6/Perl6-PathTools/.work/1444255482_1
 
-    > say tmpdir("/con/con")'
+    > say tmppath("/con/con")'
     /con/con/p6mktemp/1444268295_1
 
-    > say tmpdir.IO.e;
+    > say tmppath.IO.e;
     False
 
-    > say mkdirs(tmpdir).IO.e
+    > say mkdirs(tmppath).IO.e
     True
 
 =cut
