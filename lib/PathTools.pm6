@@ -4,9 +4,9 @@ sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r = False, *%_)
     return () if !$path.IO.e || (%_<test>:exists && $path !~~ %_<test>);
     return (?$f ?? $path !! ()) if $path.IO.f;
     my $cwd-paths = $path.IO.dir(|%_).cache;
-    my $files     = $cwd-paths.grep(*.IO.f).cache  if ?$f;
-    my $dirs      = $cwd-paths.grep(*.IO.d).cache  if ?$d;
-    my $rec-paths = $dirs>>.&ls(:$f, :$d, :r, |%_) if ?$r;
+    my $files     = $cwd-paths.grep(*.IO.f).cache if ?$f;
+    my $dirs      = $cwd-paths.grep(*.IO.d).cache if ?$d;
+    my $rec-paths = $dirs>>.&ls(:$f, :d, :r, |%_) if ?$r && ?$d;
     ($files.Slip, $dirs.Slip, $rec-paths.Slip).grep(*.so).flat>>.Str;
 }
 
