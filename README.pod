@@ -37,7 +37,7 @@ B<Returns> C<Str @paths>
     my @files = ls($path, :r, :!d, :f);
 
     # only directories in the current level (no directory recursion)
-    my @dirs  = ls($path, :d);
+    my @dirs  = ls($path, :d, :!r);
 
 Like the built-in C<dir> but with optional recursion. Any undocumented 
 additional named arguments passed in will be passed along to the internal 

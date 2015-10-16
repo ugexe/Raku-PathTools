@@ -4,10 +4,10 @@ sub ls(Str(Cool) $path, Bool :$f = True, Bool :$d = True, Bool :$r = False, *%_)
     return () if !$path.IO.e || (%_<test>:exists && $path !~~ %_<test>);
     return (?$f ?? $path !! ()) if $path.IO.f;
     my $cwd-paths = $path.IO.dir(|%_).cache;
-    my $files     = $cwd-paths.grep(*.IO.f);
-    my $dirs      = $cwd-paths.grep(*.IO.d);
-    my $rec-paths = $cwd-paths.grep(*.IO.d)>>.&ls(:$f, :$d, :!r, |%_);
-    (($files.Slip if ?$f), ($dirs.Slip if ?$d), ($rec-paths.Slip if ?$r)).flat>>.Str;
+    my $files     = $cwd-paths.grep(*.IO.f).cache  if ?$f;
+    my $dirs      = $cwd-paths.grep(*.IO.d).cache  if ?$d;
+    my $rec-paths = $dirs>>.&ls(:$f, :$d, :r, |%_) if ?$r;
+    ($files.Slip, $dirs.Slip, $rec-paths.Slip).grep(*.so).flat>>.Str;
 }
 
 sub rm(*@paths, Bool :$f = True, Bool :$d = True, Bool :$r, *%_) is export {
@@ -29,7 +29,7 @@ sub mkdirs($path, *%_) is export {
 sub mktemp($path = &tmppath(), Bool :$f = False, *%_) is export {
     die "Cannot call mktemp with a path that already exists" if $path.IO.e;
     state @dirs; state @files;
-    END { rm(|@files, :!r, :f, :!d); rm(|@dirs, :r, :f, :d) }
+    END { rm(|@files, :r, :f, :!d) if @files; rm(|@dirs, :r, :f, :d) if @dirs; }
     ?$f ?? (do { $path.IO.open(:w).close; @files.append($path); return ~$path.IO.absolute  }  )
         !! (do { with mkdirs($path, |%_) -> $p { @dirs.append(~$p); return ~$p.IO.absolute } })
 }
