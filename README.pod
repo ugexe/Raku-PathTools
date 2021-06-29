@@ -62,7 +62,7 @@ B<Args> C<*@paths, :Bool $f = True, Bool :$d = True, Bool :$r>
 B<Returns> C<Str @deleted-paths>
 
     # rm -rf tmp/foo
-    my @deleted-files = rm("tmp/foo"), :r, :f, :d);
+    my @deleted-files = rm("tmp/foo", :r, :f, :d);
 
 Passes its arguments to L<ls> and subsequently unlinks the files and/or deletes folders, 
 possibly recursively.
