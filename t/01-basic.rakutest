@@ -1,8 +1,7 @@
-use v6;
-use PathTools;
-
-use Test;
+use Test:ver<6.c+>;
 plan 5;
+
+use PathTools;
 
 subtest {
     my $save-to = mktemp();
