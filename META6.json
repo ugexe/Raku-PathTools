@@ -1,15 +1,16 @@
 {
-    "name"        : "PathTools",
-    "version"     : "0.1.1",
-    "auth"        : "github:ugexe",
-    "authors"     : ["ugexe"],
-    "license"     : "Artistic-2.0",
-    "description" : "General purpose file system utility routines",
-    "provides"    : { "PathTools" : "lib/PathTools.rakumod" },
-    "depends"     : [ ],
-    "support"     : {
+    "name"         : "PathTools",
+    "version"      : "0.1.1",
+    "auth"         : "github:ugexe",
+    "authors"      : ["ugexe"],
+    "license"      : "Artistic-2.0",
+    "description"  : "General purpose file system utility routines",
+    "provides"     : { "PathTools" : "lib/PathTools.rakumod" },
+    "depends"      : [ ],
+    "test-depends" : [ "Test:ver<6.c+>" ],
+    "tags"         : ["paths", "tempfile"],
+    "support"      : {
         "bugtracker" : "https://github.com/ugexe/Raku-PathTools/issues",
         "source"     : "https://github.com/ugexe/Raku-PathTools.git"
-    },
-    "tags"        : ["paths", "tempfile"]
+    }
 }
